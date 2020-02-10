@@ -3,12 +3,13 @@ from keras import Sequential
 from keras.callbacks import EarlyStopping, ReduceLROnPlateau
 from keras.datasets import fashion_mnist
 from keras.layers import Conv2D, Conv2DTranspose, LeakyReLU, Flatten, Reshape
-from keras.losses import mean_squared_error, binary_crossentropy
+from keras import losses
 from keras.optimizers import Nadam
 from matplotlib import pyplot as plt
 import os
 import time
-import keras.backend as k
+from keras import backend as K
+import tensorflow as tf
 
 class imgcodec:
 
@@ -24,7 +25,7 @@ class imgcodec:
         self.input_shape = self.x_train.shape[1::]
         self.features = 4
         self.optimizer = Nadam(learning_rate=0.0001, beta_1=0.9, beta_2=0.999)
-        self.loss = binary_crossentropy
+        self.loss = losses.mean_squared_error
 
         self.coder = self.__coder()
         self.coder.compile(loss=self.loss, optimizer=self.optimizer)
@@ -116,11 +117,16 @@ class imgcodec:
         self.codec.save(save_path+"codec-" +
                         time.strftime("%Y_%m_%d-%H_%M", time.localtime())+".h5")
 
+def focal_loss(alpha=0.9, gamma=2.0):
+	def focal_loss_fixed(y_true, y_pred):
+		pt_1 = tf.where(tf.equal(y_true, 1), y_pred, tf.ones_like(y_pred))
+		pt_0 = tf.where(tf.equal(y_true, 0), y_pred, tf.zeros_like(y_pred))
+		return -K.mean(alpha * K.pow(1. - pt_1, gamma) * K.log(pt_1)) - K.mean((1 - alpha) * K.pow(pt_0, gamma) * K.log(1. - pt_0))
+	return focal_loss_fixed
 
 def folder_maker(folder_name):
     if(not os.path.isdir(folder_name)):
         os.mkdir(folder_name)
-
 
 def picture(x_test, x_gener, index):
     save_path = "./output_img/"
@@ -134,7 +140,6 @@ def picture(x_test, x_gener, index):
     plt.savefig(save_path+time.strftime("%Y_%m_%d-%H_%M",
                                         time.localtime())+"-"+index+".png")
     plt.close()
-
 
 if __name__ == "__main__":
     imgcodec = imgcodec()
