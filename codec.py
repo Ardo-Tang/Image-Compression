@@ -24,7 +24,7 @@ class imgcodec:
         self.y_test = self.x_test
 
         self.input_shape = self.x_train.shape[1::]
-        self.features = 4
+        self.features = 6
         self.optimizer = Nadam(learning_rate=0.0001, beta_1=0.9, beta_2=0.999)
         self.loss = [self.__binary_focal_loss()]
 
@@ -42,7 +42,7 @@ class imgcodec:
         out = np.reshape(out, [-1, out.shape[1], out.shape[2], 1])
         return out
 
-    def __binary_focal_loss(self, alpha=.9, gamma=2.):
+    def __binary_focal_loss(self, alpha=.9, gamma=5.):
         """
         Binary form of focal loss.
         FL(p_t) = -alpha * (1 - p_t)**gamma * log(p_t)
@@ -119,10 +119,10 @@ class imgcodec:
             factor=0.5,
             patience=2,
             verbose=1,
-            cooldown=0)
+            cooldown=2)
         earlyStop = EarlyStopping(
             monitor='loss',
-            patience=5,
+            patience=10,
             verbose=1,
             restore_best_weights=True)
 
