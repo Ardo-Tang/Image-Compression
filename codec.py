@@ -24,7 +24,7 @@ class imgcodec:
         self.y_test = self.x_test
 
         self.input_shape = self.x_train.shape[1::]
-        self.features = 6
+        self.features = 8
         self.optimizer = Nadam(learning_rate=0.0001, beta_1=0.9, beta_2=0.999)
         self.loss = [self.__binary_focal_loss()]
 
