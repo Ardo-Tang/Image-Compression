@@ -2,13 +2,12 @@ import numpy as np
 from keras import Sequential
 from keras.callbacks import EarlyStopping, ReduceLROnPlateau
 from keras.datasets import fashion_mnist
-from keras.layers import Conv2D, Conv2DTranspose, LeakyReLU
+from keras.layers import Conv2D, Conv2DTranspose, LeakyReLU, Flatten, Reshape
 from keras.losses import mean_squared_error
 from keras.optimizers import Nadam
 from matplotlib import pyplot as plt
 import os
 import time 
-
 
 class imgcodec:
     
@@ -22,7 +21,16 @@ class imgcodec:
         self.y_test = self.x_test
 
         self.input_shape = self.x_train.shape[1::]
-        self.codec = self.__codec_model()
+        self.features = 4
+        self.optimizer = Nadam(learning_rate=0.0001, beta_1=0.9, beta_2=0.999)
+
+        self.coder = self.__coder()
+        self.coder.compile(loss=mean_squared_error, optimizer=self.optimizer)
+
+        self.decoder = self.__decoder()
+        self.decoder.compile(loss=mean_squared_error, optimizer=self.optimizer)
+
+        self.codec = self.__codec()
 
     def normalize(self, data):
         out = data / 255.0
@@ -30,22 +38,35 @@ class imgcodec:
         out = np.reshape(out, [-1, out.shape[1], out.shape[2], 1])
         return out
 
-    def __codec_model(self):
+    def __coder(self):
         model = Sequential()
-        model.add(Conv2D(filters=32, kernel_size=9, strides=2, padding="same", input_shape=self.input_shape))#, input_shape=self.input_shape
+        model.add(Conv2D(filters=self.features, kernel_size=9, strides=2, padding="same", input_shape=self.input_shape))#, input_shape=self.input_shape
         model.add(LeakyReLU())
 
-        model.add(Conv2D(filters=32, kernel_size=5, strides=2, padding="same"))
-        
-        #coder output
-        #quantize
-        #decoder input
+        model.add(Conv2D(filters=self.features, kernel_size=5, strides=2, padding="same"))
 
-        model.add(Conv2DTranspose(filters=32, kernel_size=5, strides=2, padding="same"))
+        model.add(Flatten())
+        
+        return model
+
+    def __decoder(self):
+        model = Sequential()
+
+        model.add(Reshape((7,7,self.features)))
+
+        model.add(Conv2DTranspose(filters=self.features, kernel_size=5, strides=2, padding="same"))
         model.add(LeakyReLU())
 
         model.add(Conv2DTranspose(filters=1, kernel_size=9, strides=2, padding="same"))
         model.add(LeakyReLU())
+        
+        return model
+
+    def __codec(self):
+        model = Sequential()
+
+        model.add(self.coder)
+        model.add(self.decoder)
         
         model.summary()
 
@@ -66,8 +87,7 @@ class imgcodec:
 
         callbacks = [reduceLR, earlyStop]
 
-        optimizer = Nadam(learning_rate=0.0001, beta_1=0.9, beta_2=0.999)
-        self.codec.compile(loss=mean_squared_error, optimizer=optimizer)
+        self.codec.compile(loss=mean_squared_error, optimizer=self.optimizer)
         self.codec.fit(
             self.x_train, self.y_train, 
             batch_size=2048,
@@ -77,9 +97,11 @@ class imgcodec:
             verbose=1,
             validation_data=[self.x_test,self.y_test])
 
-        save_path = "./model/"
+        save_path = "./models/"
         folder_maker(save_path)
-        self.codec.save(save_path+time.strftime("%Y_%m_%d-%H_%M", time.localtime())+".h5")
+        self.coder.save(save_path+"coder-"+time.strftime("%Y_%m_%d-%H_%M", time.localtime())+".h5")
+        self.decoder.save(save_path+"decoder-"+time.strftime("%Y_%m_%d-%H_%M", time.localtime())+".h5")
+        self.codec.save(save_path+"codec-"+time.strftime("%Y_%m_%d-%H_%M", time.localtime())+".h5")
 
 def folder_maker(folder_name):
     if(not os.path.isdir(folder_name)):
@@ -95,13 +117,18 @@ def picture(x_test, x_gener, index):
     plt.subplot(212)
     plt.imshow(x_gener)
     plt.savefig(save_path+time.strftime("%Y_%m_%d-%H_%M", time.localtime())+"-"+index+".png")
+    plt.close()
 
 if __name__ == "__main__":
     imgcodec = imgcodec()
     imgcodec.codec_training()
 
     # i=0
-    for i in range(500):
+    N = 20
+    for i in range(N):
         test = np.reshape(imgcodec.x_test[i], [28,28])
-        gerner = np.reshape(imgcodec.codec.predict(np.reshape(imgcodec.x_test[i], [1,28,28,1])), [28,28])
-        picture(test, gerner, i.zfill(3))
+        gerner = imgcodec.coder.predict(np.reshape(imgcodec.x_test[i], [1,28,28,1]))
+        gerner = imgcodec.decoder.predict(np.reshape(gerner, [1,196]))
+        gerner = np.reshape(gerner, [28,28])
+        picture(test, gerner, str(i).zfill(3))
+        print(str(i)+"/"+str(N)+"\r", end="")
