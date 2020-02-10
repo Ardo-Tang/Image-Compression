@@ -70,8 +70,8 @@ class imgcodec:
         self.codec.compile(loss=mean_squared_error, optimizer=optimizer)
         self.codec.fit(
             self.x_train, self.y_train, 
-            batch_size=64,
-            epochs=2,
+            batch_size=2048,
+            epochs=10000000,
             callbacks=callbacks,
             use_multiprocessing=True,
             verbose=1,
@@ -92,4 +92,6 @@ if __name__ == "__main__":
     imgcodec = imgcodec()
     imgcodec.codec_training()
 
-    picture(imgcodec.x_test[0], imgcodec.codec.predict(imgcodec.x_test[0]))
+    test = np.reshape(imgcodec.x_test[0], [28,28])
+    gerner = np.reshape(imgcodec.codec.predict(np.reshape(imgcodec.x_test[0], [1,28,28,1])), [28,28])
+    picture(test, gerner)
