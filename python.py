@@ -55,12 +55,12 @@ class imgcodec:
         reduceLR = ReduceLROnPlateau(
             monitor='loss', 
             factor=0.5, 
-            patience=3, 
+            patience=2, 
             verbose=1,
             cooldown=0)
         earlyStop = EarlyStopping(
             monitor='loss', 
-            patience=10, 
+            patience=5, 
             verbose=1,
             restore_best_weights=True)
 
@@ -77,21 +77,31 @@ class imgcodec:
             verbose=1,
             validation_data=[self.x_test,self.y_test])
 
-def picture(x_test, x_gener):
+        save_path = "./model/"
+        folder_maker(save_path)
+        self.codec.save(save_path+time.strftime("%Y_%m_%d-%H_%M", time.localtime())+".h5")
+
+def folder_maker(folder_name):
+    if(not os.path.isdir(folder_name)):
+        os.mkdir(folder_name)
+    
+def picture(x_test, x_gener, index):
     save_path = "./output_img/"
-    if(not os.path.isdir(save_path)):
-        os.mkdir(save_path)
+    folder_maker(save_path)
+
     plt.figure()
     plt.subplot(211)
     plt.imshow(x_test)
     plt.subplot(212)
     plt.imshow(x_gener)
-    plt.savefig(save_path+time.strftime("%Y_%m_%d-%H_%M", time.localtime())+".png")
+    plt.savefig(save_path+time.strftime("%Y_%m_%d-%H_%M", time.localtime())+"-"+index+".png")
 
 if __name__ == "__main__":
     imgcodec = imgcodec()
     imgcodec.codec_training()
 
-    test = np.reshape(imgcodec.x_test[0], [28,28])
-    gerner = np.reshape(imgcodec.codec.predict(np.reshape(imgcodec.x_test[0], [1,28,28,1])), [28,28])
-    picture(test, gerner)
+    # i=0
+    for i in range(500):
+        test = np.reshape(imgcodec.x_test[i], [28,28])
+        gerner = np.reshape(imgcodec.codec.predict(np.reshape(imgcodec.x_test[i], [1,28,28,1])), [28,28])
+        picture(test, gerner, i.zfill(3))
