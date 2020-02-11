@@ -4,10 +4,10 @@ import numpy as np
 from keras import Sequential, losses
 from keras.callbacks import EarlyStopping, ReduceLROnPlateau
 from keras.datasets import fashion_mnist
-from keras.layers import Conv2D, Conv2DTranspose, Flatten, LeakyReLU, Reshape, BatchNormalization
+from keras.layers import Conv2D, Conv2DTranspose, Flatten, LeakyReLU, Reshape, BatchNormalization, Dense
 from keras.optimizers import Nadam, Adam
 from keras.models import load_model
-from keras.losses import mean_squared_error
+from keras.losses import mean_squared_error, binary_crossentropy
 
 import image_compression_lib as icl
 
@@ -28,9 +28,10 @@ class imgcodec:
 
         self.input_shape = self.x_train.shape[1::]
         self.features = 8
+        self.coding_stream = 150
         self.optimizer = Nadam(learning_rate=0.0001, beta_1=0.9, beta_2=0.999)
         # self.loss = [icl.binary_focal_loss()]
-        self.loss = mean_squared_error
+        self.loss = binary_crossentropy
 
         self.coder = self.__coder()
         self.coder.compile(loss=self.loss, optimizer=self.optimizer)
@@ -54,15 +55,22 @@ class imgcodec:
 
         model.add(Conv2D(filters=self.features,
                          kernel_size=5, strides=2, padding="same"))
+        model.add(LeakyReLU())
 
         model.add(Flatten())
+
+        model.add(Dense(self.coding_stream))
+        model.add(LeakyReLU())
 
         return model
 
     def __decoder(self):
         model = Sequential()
 
-        model.add(Reshape((7, 7, self.features)))
+        model.add(Dense(196, input_shape=[self.coding_stream]))
+        model.add(LeakyReLU())
+
+        model.add(Reshape((7, 7, 4)))
 
         model.add(Conv2DTranspose(filters=self.features,
                                   kernel_size=5, strides=2, padding="same"))
@@ -130,7 +138,7 @@ if __name__ == "__main__":
         test = np.reshape(codec.x_test[i], [28, 28])
         gerner = codec.coder.predict(
             np.reshape(codec.x_test[i], [1, 28, 28, 1]))
-        gerner = codec.decoder.predict(np.reshape(gerner, [1, 392]))
+        gerner = codec.decoder.predict(np.reshape(gerner, [1, codec.coding_stream]))
         gerner = np.reshape(gerner, [28, 28])
         icl.picture(test, gerner, str(i).zfill(3))
         print(str(i)+"/"+str(N)+"\r", end="")
