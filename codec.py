@@ -4,7 +4,7 @@ import numpy as np
 from keras import Sequential, losses
 from keras.callbacks import EarlyStopping, ReduceLROnPlateau
 from keras.datasets import fashion_mnist
-from keras.layers import Conv2D, Conv2DTranspose, Flatten, LeakyReLU, Reshape
+from keras.layers import Conv2D, Conv2DTranspose, Flatten, LeakyReLU, Reshape, BatchNormalization
 from keras.optimizers import Nadam, Adam
 from keras.models import load_model
 from keras.losses import mean_squared_error
@@ -13,6 +13,7 @@ import image_compression_lib as icl
 
 from keras import backend as K
 import tensorflow as tf
+
 
 class imgcodec:
 
@@ -51,6 +52,8 @@ class imgcodec:
                          input_shape=self.input_shape))
         model.add(LeakyReLU())
 
+        model.add(BatchNormalization())
+
         model.add(Conv2D(filters=self.features,
                          kernel_size=5, strides=2, padding="same"))
 
@@ -66,6 +69,8 @@ class imgcodec:
         model.add(Conv2DTranspose(filters=self.features,
                                   kernel_size=5, strides=2, padding="same"))
         model.add(LeakyReLU())
+        
+        model.add(BatchNormalization())
 
         model.add(Conv2DTranspose(
             filters=1, kernel_size=9, strides=2, padding="same"))
