@@ -52,8 +52,6 @@ class imgcodec:
                          input_shape=self.input_shape))
         model.add(LeakyReLU())
 
-        model.add(BatchNormalization())
-
         model.add(Conv2D(filters=self.features,
                          kernel_size=5, strides=2, padding="same"))
 
@@ -69,8 +67,6 @@ class imgcodec:
         model.add(Conv2DTranspose(filters=self.features,
                                   kernel_size=5, strides=2, padding="same"))
         model.add(LeakyReLU())
-        
-        model.add(BatchNormalization())
 
         model.add(Conv2DTranspose(
             filters=1, kernel_size=9, strides=2, padding="same"))
