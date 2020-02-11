@@ -16,8 +16,8 @@ def binary_focal_loss_fixed(y_true, y_pred):
     alpha=.9
     gamma=5.
 
-    pt_1 = tf.where(tf.equal(y_true, 1), y_pred, tf.ones_like(y_pred))
-    pt_0 = tf.where(tf.equal(y_true, 0), y_pred, tf.zeros_like(y_pred))
+    pt_1 = tf.where(tf.equal(y_true, tf.ones_like(y_true)), y_pred, tf.ones_like(y_pred))
+    pt_0 = tf.where(tf.equal(y_true, tf.zeros_like(y_true)), y_pred, tf.zeros_like(y_pred))
 
     epsilon = K.epsilon()
     # clip to prevent NaN's and Inf's

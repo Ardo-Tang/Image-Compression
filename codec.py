@@ -5,8 +5,9 @@ from keras import Sequential, losses
 from keras.callbacks import EarlyStopping, ReduceLROnPlateau
 from keras.datasets import fashion_mnist
 from keras.layers import Conv2D, Conv2DTranspose, Flatten, LeakyReLU, Reshape
-from keras.optimizers import Nadam
+from keras.optimizers import Nadam, Adam
 from keras.models import load_model
+from keras.losses import mean_squared_error
 
 import image_compression_lib as icl
 
@@ -26,8 +27,9 @@ class imgcodec:
 
         self.input_shape = self.x_train.shape[1::]
         self.features = 8
-        self.optimizer = Nadam(learning_rate=0.0001, beta_1=0.9, beta_2=0.999)
-        self.loss = [icl.binary_focal_loss()]
+        self.optimizer = Adam(learning_rate=0.0001, beta_1=0.9, beta_2=0.999)
+        # self.loss = [icl.binary_focal_loss()]
+        self.loss = mean_squared_error
 
         self.coder = self.__coder()
         self.coder.compile(loss=self.loss, optimizer=self.optimizer)
@@ -103,7 +105,7 @@ class imgcodec:
         self.codec.compile(loss=self.loss, optimizer=self.optimizer)
         self.codec.fit(
             self.x_train, self.y_train,
-            batch_size=2048,
+            batch_size=4096,
             epochs=10000000,
             callbacks=callbacks,
             use_multiprocessing=True,
