@@ -122,9 +122,9 @@ class imgcodec:
 
 if __name__ == "__main__":
     codec = imgcodec()
-    # codec.codec_training()
-    codec.coder = load_model("./models/coder-2020_02_11-09_30.h5", custom_objects={"binary_focal_loss_fixed"=icl.binary_focal_loss_fixed, "binary_focal_loss"=icl.binary_focal_loss})
-    codec.decoder = load_model("./models/decoder-2020_02_11-09_30.h5", custom_objects={"binary_focal_loss_fixed"=icl.binary_focal_loss_fixed, "binary_focal_loss"=icl.binary_focal_loss})
+    codec.codec_training()
+    # codec.coder = load_model("./models/coder-2020_02_11-09_30.h5", custom_objects={"binary_focal_loss_fixed":icl.binary_focal_loss_fixed, "binary_focal_loss":icl.binary_focal_loss})
+    # codec.decoder = load_model("./models/decoder-2020_02_11-09_30.h5", custom_objects={"binary_focal_loss_fixed":icl.binary_focal_loss_fixed, "binary_focal_loss":icl.binary_focal_loss})
 
     # i=0
     N = 20
