@@ -83,11 +83,7 @@ class imgcodec:
 
         return model
 
-    def __custom_loss(self):
-
-        pass
-
-    def codec_training(self):
+    def codec_trainer(self):
         reduceLR = ReduceLROnPlateau(
             monitor='loss',
             factor=0.5,
@@ -105,7 +101,7 @@ class imgcodec:
         self.codec.compile(loss=self.loss, optimizer=self.optimizer)
         self.codec.fit(
             self.x_train, self.y_train,
-            batch_size=4096,
+            batch_size=8192,
             epochs=10000000,
             callbacks=callbacks,
             use_multiprocessing=True,
@@ -124,11 +120,10 @@ class imgcodec:
 
 if __name__ == "__main__":
     codec = imgcodec()
-    codec.codec_training()
+    codec.codec_trainer()
     # codec.coder = load_model("./models/coder-2020_02_11-09_30.h5", custom_objects={"binary_focal_loss_fixed":icl.binary_focal_loss_fixed, "binary_focal_loss":icl.binary_focal_loss})
     # codec.decoder = load_model("./models/decoder-2020_02_11-09_30.h5", custom_objects={"binary_focal_loss_fixed":icl.binary_focal_loss_fixed, "binary_focal_loss":icl.binary_focal_loss})
 
-    # i=0
     N = 20
     for i in range(N):
         test = np.reshape(codec.x_test[i], [28, 28])
