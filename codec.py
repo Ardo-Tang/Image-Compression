@@ -31,7 +31,7 @@ class imgcodec:
         self.coding_stream = 150
         self.optimizer = Nadam(learning_rate=0.0001, beta_1=0.9, beta_2=0.999)
         # self.loss = [icl.binary_focal_loss()]
-        self.loss = binary_crossentropy
+        self.loss = mean_squared_error
 
         self.coder = self.__coder()
         self.coder.compile(loss=self.loss, optimizer=self.optimizer)
