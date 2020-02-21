@@ -72,6 +72,6 @@ def unormalize(data):
 
     temp = []
     for i in range(out.shape[0]):
-        temp.append([int(j) for j in out[i, :]])
+        temp.append([int(j*255) for j in out[i, :]])
     out = np.array(temp)
     return out
