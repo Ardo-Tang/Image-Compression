@@ -43,14 +43,12 @@ class imgcodec:
 
     def __coder(self):
         model = Sequential()
-        model.add(Conv2D(filters=8, kernel_size=5, strides=1, padding="same",
+        model.add(Conv2D(filters=8, kernel_size=5, strides=2, padding="same",
                          input_shape=self.input_shape))
         model.add(LeakyReLU())
-        model.add(AveragePooling2D(pool_size=2, padding="same"))
 
-        model.add(Conv2D(filters=4, kernel_size=3, strides=1, padding="same"))
+        model.add(Conv2D(filters=4, kernel_size=3, strides=2, padding="same"))
         model.add(LeakyReLU())
-        model.add(AveragePooling2D(pool_size=2, padding="same"))
 
         model.add(Flatten())
 
@@ -62,16 +60,13 @@ class imgcodec:
         model = Sequential()
         model.add(Reshape((7, 7, 4), input_shape=self.coding_stream[1::]))
 
-        model.add(Conv2D(filters=4, kernel_size=3, strides=1, padding="same"))
+        model.add(Conv2DTranspose(filters=4, kernel_size=3, strides=2, padding="same"))
         model.add(LeakyReLU())
-        model.add(UpSampling2D(size=(2, 2), interpolation="bilinear"))
 
-        model.add(Conv2D(filters=8, kernel_size=3, strides=1, padding="same"))
+        model.add(Conv2DTranspose(filters=8, kernel_size=3, strides=2, padding="same"))
         model.add(LeakyReLU())
-        model.add(UpSampling2D(size=(2, 2), interpolation="bilinear"))
 
-        model.add(Conv2D(filters=1, kernel_size=3, strides=1, padding="same"))
-        model.add(LeakyReLU())
+        model.add(Conv2DTranspose(filters=1, kernel_size=3, strides=1, padding="same"))
 
         return model
 
