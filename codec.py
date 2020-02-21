@@ -104,7 +104,7 @@ class imgcodec:
         self.codec.fit(
             self.x_train, self.y_train,
             batch_size=8192,
-            epochs=1,
+            epochs=10000000,
             callbacks=callbacks,
             use_multiprocessing=True,
             verbose=1,
