@@ -62,7 +62,7 @@ def picture(x_test, x_gener, index):
     plt.close()
 
 def normalize(data):
-    out = data# / 255.0
+    out = data / 255.0
 
     out = np.reshape(out, [-1, out.shape[1], out.shape[2], 1])
     return out
