@@ -20,8 +20,8 @@ class imgcodec:
     (x_train, y_train), (x_test, y_test) = fashion_mnist.load_data()
 
     def __init__(self):
-        self.x_train = self.normalize(self.x_train)
-        self.x_test = self.normalize(self.x_test)
+        self.x_train = icl.normalize(self.x_train)
+        self.x_test = icl.normalize(self.x_test)
 
         self.y_train = self.x_train
         self.y_test = self.x_test
@@ -40,12 +40,6 @@ class imgcodec:
         self.decoder.compile(loss=self.loss, optimizer=self.optimizer)
 
         self.codec = self.__codec()
-
-    def normalize(self, data):
-        out = data / 255.0
-
-        out = np.reshape(out, [-1, out.shape[1], out.shape[2], 1])
-        return out
 
     def __coder(self):
         model = Sequential()
@@ -118,12 +112,9 @@ class imgcodec:
 
         save_path = "./models/"
         icl.folder_maker(save_path)
-        self.coder.save(save_path+"coder-" +
-                        time.strftime("%Y_%m_%d-%H_%M", time.localtime())+".h5")
-        self.decoder.save(
-            save_path+"decoder-"+time.strftime("%Y_%m_%d-%H_%M", time.localtime())+".h5")
-        self.codec.save(save_path+"codec-" +
-                        time.strftime("%Y_%m_%d-%H_%M", time.localtime())+".h5")
+        self.coder.save(save_path+"coder-" + time.strftime("%Y_%m_%d-%H_%M", time.localtime())+".h5")
+        self.decoder.save(save_path+"decoder-"+time.strftime("%Y_%m_%d-%H_%M", time.localtime())+".h5")
+        self.codec.save(save_path+"codec-" + time.strftime("%Y_%m_%d-%H_%M", time.localtime())+".h5")
 
 
 if __name__ == "__main__":
@@ -135,8 +126,7 @@ if __name__ == "__main__":
     N = 20
     for i in range(N):
         test = np.reshape(codec.x_test[i], [28, 28])
-        gerner = codec.coder.predict(
-            np.reshape(codec.x_test[i], [1, 28, 28, 1]))
+        gerner = codec.coder.predict(np.reshape(codec.x_test[i], [1, 28, 28, 1]))
         gerner = codec.decoder.predict(np.reshape(gerner, [1, -1]))
         gerner = np.reshape(gerner, [28, 28])
         icl.picture(test, gerner, str(i).zfill(3))
