@@ -20,8 +20,8 @@ class imgcodec:
     (x_train, y_train), (x_test, y_test) = fashion_mnist.load_data()
 
     def __init__(self):
-        self.x_train = icl.normalize(self.x_train)
-        self.x_test = icl.normalize(self.x_test)
+        # self.x_train = icl.normalize(self.x_train)
+        # self.x_test = icl.normalize(self.x_test)
 
         self.y_train = self.x_train
         self.y_test = self.x_test
@@ -104,7 +104,7 @@ class imgcodec:
         self.codec.fit(
             self.x_train, self.y_train,
             batch_size=8192,
-            epochs=10000000,
+            epochs=1,
             callbacks=callbacks,
             use_multiprocessing=True,
             verbose=1,
