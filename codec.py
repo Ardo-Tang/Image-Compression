@@ -104,7 +104,7 @@ class imgcodec:
         self.codec.fit(
             self.x_train, self.y_train,
             batch_size=8192,
-            epochs=10000000,
+            epochs=1,
             callbacks=callbacks,
             use_multiprocessing=True,
             verbose=1,
@@ -128,6 +128,6 @@ if __name__ == "__main__":
         test = np.reshape(codec.x_test[i], [28, 28])
         gerner = codec.coder.predict(np.reshape(codec.x_test[i], [1, 28, 28, 1]))
         gerner = codec.decoder.predict(np.reshape(gerner, [1, -1]))
-        gerner = np.reshape(gerner, [28, 28])
+        gerner = icl.unormalize(gerner)
         icl.picture(test, gerner, str(i).zfill(3))
         print(str(i)+"/"+str(N)+"\r", end="")
