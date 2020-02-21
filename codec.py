@@ -4,7 +4,7 @@ import numpy as np
 from keras import Sequential, losses
 from keras.callbacks import EarlyStopping, ReduceLROnPlateau
 from keras.datasets import fashion_mnist
-from keras.layers import Conv2D, Conv2DTranspose, Flatten, LeakyReLU, Reshape, BatchNormalization, Dense
+from keras.layers import Conv2D, Conv2DTranspose, Flatten, LeakyReLU, Reshape, BatchNormalization, Dense, AveragePooling2D, UpSampling2D
 from keras.optimizers import Nadam, Adam
 from keras.models import load_model
 from keras.losses import mean_squared_error, binary_crossentropy
@@ -49,35 +49,34 @@ class imgcodec:
 
     def __coder(self):
         model = Sequential()
-        model.add(Conv2D(filters=self.features, kernel_size=9, strides=2, padding="same",
+        model.add(Conv2D(filters=8, kernel_size=5, strides=1, padding="same",
                          input_shape=self.input_shape))
         model.add(LeakyReLU())
+        model.add(AveragePooling2D(pool_size=2, padding="same"))
 
-        model.add(Conv2D(filters=self.features,
-                         kernel_size=5, strides=2, padding="same"))
+        model.add(Conv2D(filters=4, kernel_size=3, strides=1, padding="same"))
         model.add(LeakyReLU())
+        model.add(AveragePooling2D(pool_size=2, padding="same"))
 
         model.add(Flatten())
 
-        model.add(Dense(self.coding_stream))
-        model.add(LeakyReLU())
+        self.coding_stream = model.output_shape
 
         return model
 
     def __decoder(self):
         model = Sequential()
+        model.add(Reshape((7, 7, 4), input_shape=self.coding_stream[1::]))
 
-        model.add(Dense(196, input_shape=[self.coding_stream]))
+        model.add(Conv2D(filters=4, kernel_size=3, strides=1, padding="same"))
         model.add(LeakyReLU())
+        model.add(UpSampling2D(size=(2, 2), interpolation="bilinear"))
 
-        model.add(Reshape((7, 7, 4)))
-
-        model.add(Conv2DTranspose(filters=self.features,
-                                  kernel_size=5, strides=2, padding="same"))
+        model.add(Conv2D(filters=8, kernel_size=3, strides=1, padding="same"))
         model.add(LeakyReLU())
+        model.add(UpSampling2D(size=(2, 2), interpolation="bilinear"))
 
-        model.add(Conv2DTranspose(
-            filters=1, kernel_size=9, strides=2, padding="same"))
+        model.add(Conv2D(filters=1, kernel_size=3, strides=1, padding="same"))
         model.add(LeakyReLU())
 
         return model
@@ -138,7 +137,7 @@ if __name__ == "__main__":
         test = np.reshape(codec.x_test[i], [28, 28])
         gerner = codec.coder.predict(
             np.reshape(codec.x_test[i], [1, 28, 28, 1]))
-        gerner = codec.decoder.predict(np.reshape(gerner, [1, codec.coding_stream]))
+        gerner = codec.decoder.predict(np.reshape(gerner, [1, -1]))
         gerner = np.reshape(gerner, [28, 28])
         icl.picture(test, gerner, str(i).zfill(3))
         print(str(i)+"/"+str(N)+"\r", end="")
